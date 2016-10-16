@@ -22,6 +22,7 @@ function init() {
 	var	loader = PIXI.loader;
 	var	resources = PIXI.loader.resources;
 	var	Sprite = PIXI.Sprite;
+	var graphics = new PIXI.Graphics();
 
 	//RENDERER & STAGE
 	var renderer = PIXI.autoDetectRenderer(width, height);
@@ -65,24 +66,21 @@ function init() {
         let elapsed = now - last;
         last = now;
 
-
-		var graphics = new PIXI.Graphics();
-
 		graphics.clear();
 		graphics.beginFill(0xAAAAAA);
-		graphics.lineStyle(1, 0xFF0000);
 
 		for (var i = 0; i < cells.length; i++) {
-			var cell = cells[i];
-			// draw a rectangle
-			graphics.drawRect(cell.x + cellSize * i, cell.y + cellSize * i, cellSize, cellSize);
 
-			stage.addChild(graphics);
+			var cell = cells[i];
+			console.log(cell);
+			var drawPosX = cell.x + ( (cell.x % 10) * (cellSize+2) );
+			var drawPosY = cell.y + ( (cell.y % 10) * cellSize );
+
+			graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
+
 		}
 
-
-
-		//Render the stage to see the animation
+		stage.addChild(graphics);
 		renderer.render(stage);
 
 	}
