@@ -1,10 +1,9 @@
 window.onload = init;
 
 class Cell {
-	constructor(x,y,number){
+	constructor(x,y){
 		this.x=x;
 		this.y=y;
-		this.number = number;
 
 		this.visited = false;
 		this.closedWalls = ["top","right","bottom","left"]
@@ -14,11 +13,11 @@ class Cell {
 function init() {
 	//SETTINGS
 	var canvasSize = 750;
-	var padding = 250;
-
+	var paddingTotal = 50;
+	var paddingPerSide = paddingTotal / 2;
 	var numberOfCellsPerRow = 50;
 
-	var cellSize = (canvasSize - (padding + numberOfCellsPerRow)) / numberOfCellsPerRow;
+	var cellSize = (canvasSize - (paddingTotal)) / numberOfCellsPerRow;
 
 	//PIXI JS ALIASES
 	var Container = PIXI.Container;
@@ -42,12 +41,10 @@ function init() {
 	function setup() {
 
 		//init maze here
-		var count = 0;
 		for (var x = 0; x < numberOfCellsPerRow; x++) {
 			for (var y = 0; y < numberOfCellsPerRow; y++) {
-				var cell = new Cell(x,y,count);
+				var cell = new Cell(x,y);
 				cells.push(cell);
-				count++;
 			}
 		}
 
@@ -68,13 +65,19 @@ function init() {
         last = now;
 
 		graphics.clear();
-		graphics.beginFill(0xAAAAAA);
+		graphics.beginFill(0x666666);
+		graphics.lineStyle(1, 0x999999);
 
 		for (var i = 0; i < cells.length; i++) {
 
 			var cell = cells[i];
-			var drawPosX = padding/2 + cell.x + ((cell.x % numberOfCellsPerRow) * (cellSize));
-			var drawPosY = padding/2 + cell.y + ((cell.y % numberOfCellsPerRow) * (cellSize));
+
+			var x = cell.x;
+			var y = cell.y;
+
+
+			var drawPosX = paddingPerSide + x + ((x % numberOfCellsPerRow) * (cellSize-1));
+			var drawPosY = paddingPerSide + y + ((y % numberOfCellsPerRow) * (cellSize-1));
 
 			graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
 		}
