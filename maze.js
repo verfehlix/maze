@@ -14,33 +14,33 @@ class Cell {
 		//add neighbour cell coordinates
 		this.neighbours = {};
 
-		if(this.y + 1 <= this.maxCoordinate){
+		if(this.y + 2 <= this.maxCoordinate){
 			this.neighbours.bottom = {
 				x: this.x,
-				y: this.y + 1,
+				y: this.y + 2,
 				name: "bottom"
 			}
 		};
 
-		if(this.x + 1 <= this.maxCoordinate){
+		if(this.x + 2 <= this.maxCoordinate){
 			this.neighbours.right = {
-				x: this.x + 1,
+				x: this.x + 2,
 				y: this.y,
 				name: "right"
 			}
 		};
 
-		if(this.y - 1 >= 0){
+		if(this.y - 2 >= 0){
 			this.neighbours.top = {
 				x: this.x,
-				y: this.y - 1,
+				y: this.y - 2,
 				name: "top"
 			}
 		};
 
-		if(this.x - 1 >= 0){
+		if(this.x - 2 >= 0){
 			this.neighbours.left = {
-				x: this.x -1,
+				x: this.x -2,
 				y: this.y,
 				name: "left"
 			}
@@ -94,7 +94,42 @@ class Grid {
 		//return cell at this coordinate
 		return this.getCellAtXY(x,y);
 	}
+
+	getRandomCornerCell(){
+		var min = 0;
+		var max = this.numberOfCellsPerRow - 1;
+		var rand = Math.random();
+		switch (rand) {
+			case rand <= 0.25:
+				return this.getCellAtXY(min,min);
+				break;
+			case rand > 0.25 && rand <= 0.5:
+				return this.getCellAtXY(min,max);
+				break;
+			case rand > 0.5 && rand <= 0.75:
+				return this.getCellAtXY(max,min);
+				break;
+			case rand > 0.75:
+				return this.getCellAtXY(max,max);
+				break;
+			default:
+				return this.getCellAtXY(2,2);
+		}
+	}
 }
+
+function shuffle(array) {
+    var j, x, i;
+	var shuffledArray = array.slice();
+    for (i = shuffledArray.length; i; i--) {
+        j = Math.floor(Math.random() * i);
+        x = shuffledArray[i - 1];
+        shuffledArray[i - 1] = shuffledArray[j];
+        shuffledArray[j] = x;
+    }
+	return shuffledArray;
+}
+
 
 function init() {
 	//SETTINGS
@@ -104,7 +139,8 @@ function init() {
 	//padding from canvas border to start of grid (pixels)
 	var paddingTotal = 50;
 	//number of cells each row should contain (e.g. 50 --> 50x50 grid)
-	var numberOfCellsPerRow = 20;
+	//only uneven numbers!
+	var numberOfCellsPerRow = 53;
 
 	//calculate pixel size for each cell
 	var cellSize = (canvasSize - (paddingTotal)) / numberOfCellsPerRow;
@@ -136,7 +172,7 @@ function init() {
 		//clear all graphic objects on the stage
 		graphics.clear();
 		//set drawing style
-		graphics.lineStyle(1, 0x999999);
+		// graphics.lineStyle(1, 0x999999);
 
 		//iterate all cells in the grid
 		for (var i = 0; i < grid.cells.length; i++) {
@@ -162,54 +198,38 @@ function init() {
 		stage.addChild(graphics);
 	}
 
-	function backtrack(cell) {
-		setTimeout(function () {
-			console.log("----------Backtrack----------")
-			cell.visited = true;
+	function backtrack(cell, previousCell){
 
-			var wallToCarve = cell.closedWalls[Math.floor(Math.random()*cell.closedWalls.length)];
+		cell.visited = true;
 
-			console.log(cell);
-			console.log("Carving into: |" + wallToCarve + "| Wall.");
+		if(previousCell){
+			var xMid = (cell.x + previousCell.x) / 2;
+			var yMid = (cell.y + previousCell.y) / 2;
 
-			var neighbourInfo = cell.neighbours[wallToCarve];
+			var midCell = grid.getCellAtXY(xMid, yMid);
+			midCell.visited = true;
+		}
+
+		var remainingSides = shuffle(cell.closedWalls);
+
+		while(remainingSides.length > 0){
+
+			var side = remainingSides[0];
+
+			var neighbourInfo = cell.neighbours[side];
+
 			if(neighbourInfo){
-				var neighbour = grid.getCellAtXY(neighbourInfo.x, neighbourInfo.y);
-				console.log("Neighbour exists!")
-				console.log(neighbour);
+				var neighbourCell = grid.getCellAtXY(neighbourInfo.x, neighbourInfo.y);
+				if(!neighbourCell.visited){
+					drawCells();
+					renderer.render(stage);
 
-				if(!neighbour.visited){
-					console.log("Neighbour is not visited! Next Neighbour?");
-
-					var nextNeighbourInfo = neighbour.neighbours[wallToCarve];
-					if(nextNeighbourInfo){
-						var nextNeighbour = grid.getCellAtXY(nextNeighbourInfo.x, nextNeighbourInfo.y);
-						console.log("Next Neighbour exists also!")
-
-						if(!nextNeighbour.visited){
-							console.log("Next Neighbour is also not visited! Carving!");
-
-							neighbour.visited = true;
-
-							//draw the cells onto the stage
-							drawCells();
-
-							//render the stage
-							renderer.render(stage);
-
-							backtrack(nextNeighbour);
-
-						} else {
-							backtrack(nextNeighbour);
-						}
-					}
-				} else {
-					backtrack(cell);
+					backtrack(neighbourCell, cell);
 				}
-			} else {
-				backtrack(cell);
 			}
-		}, 0);
+			remainingSides.splice(0,1);
+		}
+
 	}
 
 	//SETUP
@@ -218,7 +238,8 @@ function init() {
 		//initialize grid
 		grid = new Grid(numberOfCellsPerRow);
 
-		var cell = grid.getRandomCell();
+		// var cell = grid.getRandomCell();
+		var cell = grid.getRandomCornerCell();
 
 		backtrack(cell);
 
