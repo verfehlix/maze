@@ -99,22 +99,19 @@ class Grid {
 		var min = 0;
 		var max = this.numberOfCellsPerRow - 1;
 		var rand = Math.random();
-		switch (rand) {
-			case rand <= 0.25:
-				return this.getCellAtXY(min,min);
-				break;
-			case rand > 0.25 && rand <= 0.5:
-				return this.getCellAtXY(min,max);
-				break;
-			case rand > 0.5 && rand <= 0.75:
-				return this.getCellAtXY(max,min);
-				break;
-			case rand > 0.75:
-				return this.getCellAtXY(max,max);
-				break;
-			default:
-				return this.getCellAtXY(2,2);
+		if(rand <= 0.25){
+			return this.getCellAtXY(min,min);
 		}
+		if(rand > 0.25 && rand <= 0.5){
+			return this.getCellAtXY(min,max);
+		}
+		if(rand > 0.5 && rand <= 0.75){
+			return this.getCellAtXY(max,min);
+		}
+		if(rand > 0.75){
+			return this.getCellAtXY(max,max);
+		}
+		return this.getCellAtXY(2,2);
 	}
 }
 
@@ -140,7 +137,7 @@ function init() {
 	var paddingTotal = 50;
 	//number of cells each row should contain (e.g. 50 --> 50x50 grid)
 	//only uneven numbers!
-	var numberOfCellsPerRow = 53;
+	var numberOfCellsPerRow = 33;
 
 	//calculate pixel size for each cell
 	var cellSize = (canvasSize - (paddingTotal)) / numberOfCellsPerRow;
@@ -221,8 +218,8 @@ function init() {
 			if(neighbourInfo){
 				var neighbourCell = grid.getCellAtXY(neighbourInfo.x, neighbourInfo.y);
 				if(!neighbourCell.visited){
-					drawCells();
-					renderer.render(stage);
+					// drawCells();
+					// renderer.render(stage);
 
 					backtrack(neighbourCell, cell);
 				}
