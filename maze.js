@@ -56,17 +56,30 @@ class Cell {
 		this.color = shuffle(colors)[0];
 
 		//Sprite
-		if(Math.random() > 0.5){
-			this.sprite = new PIXI.Sprite(PIXI.loader.resources.wall1.texture);
-		} else {
-			this.sprite = new PIXI.Sprite(PIXI.loader.resources.wall2.texture);
-		}
-        // set position
-        this.sprite.position.x = x;
-        this.sprite.position.y = y;
-        // set size
-        this.sprite.width = this.size;
-        this.sprite.height = this.size;
+		this.wall1Sprite = new PIXI.Sprite(PIXI.loader.resources.wall1.texture);
+		this.wall2Sprite = new PIXI.Sprite(PIXI.loader.resources.wall2.texture);
+		this.grassSprite = new PIXI.Sprite(PIXI.loader.resources.grass.texture);
+
+		this.wall1Sprite.width = this.size;
+		this.wall1Sprite.height = this.size;
+
+		this.wall2Sprite.width = this.size;
+		this.wall2Sprite.height = this.size;
+
+		this.grassSprite.width = this.size;
+		this.grassSprite.height = this.size;
+
+		this.getSprite = function(){
+			if(this.visited){
+				return this.grassSprite;
+			}
+			if(Math.random() > 0.5){
+				return this.wall1Sprite;
+			} else {
+				return this.wall2Sprite;
+			}
+		};
+
 
 	}
 }
@@ -157,7 +170,7 @@ function init() {
 	var paddingTotal = 2;
 	//number of cells each row should contain (e.g. 50 --> 50x50 grid)
 	//only uneven numbers!
-	var numberOfCellsPerRow = 25;
+	var numberOfCellsPerRow = 35;
 
 	//calculate pixel size for each cell
 	var cellSize = (canvasSize - (paddingTotal)) / numberOfCellsPerRow;
@@ -185,6 +198,7 @@ function init() {
 	loader
 		.add("wall1", "img/wall1.png")
 		.add("wall2", "img/wall2.png")
+		.add("grass", "img/grass.png")
 		.load(setup);
 
 	//make grid globally available
@@ -209,17 +223,23 @@ function init() {
 			var drawPosX = paddingPerSide + x + ((x % numberOfCellsPerRow) * (cellSize-1));
 			var drawPosY = paddingPerSide + y + ((y % numberOfCellsPerRow) * (cellSize-1));
 
-			if(cell.visited){
-				//draw the cell onto the canvas
-				graphics.beginFill(0x999999);
-				graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
-			} else {
-				//graphics.beginFill(cell.color);
-				//graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
-				cell.sprite.position.x = drawPosX;
-				cell.sprite.position.y = drawPosY;
-				stage.addChild(cell.sprite);
-			}
+			// if(cell.visited){
+			// 	//draw the cell onto the canvas
+			// 	graphics.beginFill(0x999999);
+			// 	graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
+			// } else {
+			// 	//graphics.beginFill(cell.color);
+			// 	//graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
+			// 	var sprite = cell.getSprite();
+			// 	sprite.position.x = drawPosX;
+			// 	sprite.position.y = drawPosY;
+			// 	stage.addChild(sprite);
+			// }
+
+			var sprite = cell.getSprite();
+			sprite.position.x = drawPosX;
+			sprite.position.y = drawPosY;
+			stage.addChild(sprite);
 
 
 		}
