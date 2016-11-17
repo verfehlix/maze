@@ -327,7 +327,7 @@ function init() {
 
 		var exit = grid.getRandomCornerCell();
 		exit.exitNode = true;
-		
+
 		//draw the cells onto the stage
 		drawCells();
 
