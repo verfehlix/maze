@@ -14,6 +14,9 @@ class Cell {
 		//has this cell already been visited?
 		this.visited = false;
 
+		//for exit nodes
+		this.exitNode = false;
+
 		//add neighbour cell coordinates
 		this.neighbours = {};
 
@@ -185,10 +188,55 @@ function init() {
 	loader
 		.add("wall1", "img/wall1.png")
 		.add("wall2", "img/wall2.png")
+		.add("doorTop","img/door_top.png")
+		.add("doorRight","img/door_right.png")
+		.add("doorBot","img/door_bot.png")
+		.add("doorLeft","img/door_left.png")
 		.load(setup);
 
 	//make grid globally available
 	var grid;
+
+	//function to get correct door sprite for position
+	function getDoorSprite(cell){
+		var sprite;
+		console.log(cell);
+		//TOP LEFT
+		if(cell.x === 0 && cell.y === 0){
+			if(Math.random() > 0.5){
+				sprite = new PIXI.Sprite(PIXI.loader.resources.doorTop.texture);
+			} else {
+				sprite = new PIXI.Sprite(PIXI.loader.resources.doorLeft.texture);
+			}
+		}
+		//BOTTOM LEFT
+		else if(cell.x === 0 && cell.y === 24){
+			if(Math.random() > 0.5){
+				sprite = new PIXI.Sprite(PIXI.loader.resources.doorBot.texture);
+			} else {
+				sprite = new PIXI.Sprite(PIXI.loader.resources.doorLeft.texture);
+			}
+		}
+		//BOTTOM RIGHT
+		else if(cell.x === 24 && cell.y === 24){
+			if(Math.random() > 0.5){
+				sprite = new PIXI.Sprite(PIXI.loader.resources.doorBot.texture);
+			} else {
+				sprite = new PIXI.Sprite(PIXI.loader.resources.doorRight.texture);
+			}
+		//TOP RIGHT
+		} else if(cell.x === 24 && cell.y === 0){
+			if(Math.random() > 0.5){
+				sprite = new PIXI.Sprite(PIXI.loader.resources.doorTop.texture);
+			} else {
+				sprite = new PIXI.Sprite(PIXI.loader.resources.doorRight.texture);
+			}
+		}
+		sprite.width = cell.size;
+		sprite.height = cell.size;
+
+		return sprite;
+	}
 
 	//function to draw the cells
 	function drawCells(){
@@ -210,17 +258,23 @@ function init() {
 			var drawPosY = paddingPerSide + y + ((y % numberOfCellsPerRow) * (cellSize-1));
 
 			if(cell.visited){
-				//draw the cell onto the canvas
-				graphics.beginFill(0x999999);
-				graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
-			} else {
+				if(cell.exitNode) {
+					cell.sprite = getDoorSprite(cell);
+					cell.sprite.position.x = drawPosX;
+					cell.sprite.position.y = drawPosY;
+					stage.addChild(cell.sprite);
+			   } else {
+				   //draw the cell onto the canvas
+				   graphics.beginFill(0x121212);
+				   graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
+			   }
+			}else {
 				//graphics.beginFill(cell.color);
 				//graphics.drawRect(drawPosX, drawPosY, cellSize, cellSize);
 				cell.sprite.position.x = drawPosX;
 				cell.sprite.position.y = drawPosY;
 				stage.addChild(cell.sprite);
 			}
-
 
 		}
 		stage.addChild(graphics);
@@ -271,6 +325,9 @@ function init() {
 
 		backtrack(cell);
 
+		var exit = grid.getRandomCornerCell();
+		exit.exitNode = true;
+		
 		//draw the cells onto the stage
 		drawCells();
 
